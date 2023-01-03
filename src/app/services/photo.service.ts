@@ -15,28 +15,44 @@ export class PhotoService {
   /**
    * Ma clé pour le Storage : LocalStorage par exemple pour un browser
    */
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+    // eslint-disable-next-line @typescript-eslint/naming-convention
   private PHOTO_STORAGE = 'photos';
 
 
-  constructor() { }
+  constructor() {
+  }
 
   public async loadSaved() {
     const photoList = await Preferences.get({
-      key : this.PHOTO_STORAGE
+      key: this.PHOTO_STORAGE
     });
     this.photos = JSON.parse(photoList.value) || [];
     // Display the photo by reading into base64 format
     for (const photo of this.photos) {
-        // Read each saved photo's data from the Filesystem
-        const readFile = await Filesystem.readFile({
-          path: photo.filePath,
-          directory: Directory.Data,
-        });
+      // Read each saved photo's data from the Filesystem
+      const readFile = await Filesystem.readFile({
+        path: photo.filePath,
+        directory: Directory.Data,
+      });
 
-        // Web platform only: Load the photo as base64 data
-        photo.webviewPath = `data:image/jpeg;base64,${readFile.data}`;
-      }
+      // Web platform only: Load the photo as base64 data
+      photo.webviewPath = `data:image/jpeg;base64,${readFile.data}`;
+    }
+  }
+
+  public async deletePicture(photo, position) {
+    this.photos.splice(position, 1);
+
+    await Preferences.set({
+      key: this.PHOTO_STORAGE,
+      value: JSON.stringify(this.photos),
+    });
+
+    // delete photo file from filesystem
+    await Filesystem.deleteFile({
+      path: photo.filepath,
+      directory: Directory.Data
+    });
   }
 
   public async addNewToGallery() {
@@ -116,22 +132,4 @@ export class PhotoService {
       reader.readAsDataURL(blob);
     });
 
-  deletePicture(photo, position) {
-    this.photos.splice(position, 1);
-
-    Preferences.set({
-      key: this.PHOTO_STORAGE,
-      value: JSON.stringify(this.photos),
-    }).then(r => {
-      console.log(r);
-    });
-
-    // delete photo file from filesystem
-    Filesystem.deleteFile({
-      path: photo.filepath,
-      directory: Directory.Data
-    }).then(r => {
-      console.log(r);
-    });
-  }
 }

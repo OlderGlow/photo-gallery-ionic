@@ -17,7 +17,7 @@
       <ion-row>
         <ion-col size="6" *ngFor="let photo of photoService.photos; index as position">
           <ion-img [src]="photo.webviewPath"></ion-img>
-          <ion-button (click)="photoService.deletePicture(photo, position)">Supprimer</ion-button>
+          <ion-button (click)="photoService.deletePicture(photo, position)"><ion-icon name="trash"></ion-icon></ion-button>
         </ion-col>
       </ion-row>
     </ion-grid>
